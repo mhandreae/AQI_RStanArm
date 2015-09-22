@@ -68,38 +68,22 @@ m2.0 <- glmer(formulaR2.0, data = myAQI, family = binomial,
 save(fit_log2.0, m2.0, file = "Results/results2.0.Rdata")
 ```
 
+## Stan Model
 
-## Comparison of random versus Fixed effects model
-
-```{r}
-rm(list = ls())
-load("Results/results2.0.Rdata")
-```
-
-### Details Fixed Effects
+fitted with Rstanarm 2.7 using the same formula
 
 ```{r}
-summary(fit_log2.0)
-p_values <- summary.glm((fit_log2.0))$coefficient[,4]
-ORfixed2.0 <- exp(coef(fit_log2.0)) # exponentiated coefficients 
-# CI_fitlog<- confint(fit_log) # 95% CI for the coefficients, takes too long
-kable(data.frame(ORfixed2.0, p_values), digits = 3, caption = "Results log2.0")
-```
+fit1 <-stan_glm(mpg ~ wt, data = mtcars)
 
-### Details Random Effects
+ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
+trt <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
+weight <- c(ctl, trt)
+fit <- stan_glm(weight ~ group)
+coef(fit)
 
-```{r}
-summary(m2.0)
-ORrandom2.0 <- exp(m2.0@beta) # exponentiated coefficients
-```
-
-
-### Random v. Fixed Side by Side 
-
-```{r}
-compareCoef2.0 <- data.frame(random=m2.0@beta, fixed=coef(fit_log2.0))
-kable(compareCoef2.0, caption = ("Coefficients"))
-
-compareOR2.0 <- data.frame(random=ORrandom2.0, fixed= ORfixed2.0)
-kable(compareOR2.0, caption = ("Odds ratios"))
-```
+counts <- c(18,17,15,20,10,20,25,13,12)
+outcome <- gl(3,1,9)
+treatment <- gl(3,3)
+stan_glm(counts ~ outcome + treatment, family = poisson())
+}
