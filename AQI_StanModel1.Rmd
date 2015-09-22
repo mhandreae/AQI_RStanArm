@@ -1,0 +1,105 @@
+---
+title: "Stan Model of AQI data"
+author: "Michael Andreae"
+output: html_document
+---
+
+# Insurance status predicts antiemetic use 
+we build a random effects model with procedure as random effects
+
+```{r, packages, message=FALSE, echo=FALSE, warning=FALSE}
+library(knitr) # required to set options in Markdown R
+library(lme4)
+library(rstan)
+library(rstanarm)
+# library(nlme)
+```
+
+
+
+```{r, global_options, echo=FALSE}
+# set options
+opts_chunk$set(fig.width=6, fig.height=4, fig.path='Figs/',
+               echo=FALSE, warning=FALSE, message=FALSE)
+rm(list = ls())
+everything<-FALSE
+```
+
+# Load cleaned complete case dataset
+ 
+we load the cleaned dataset with procedure information *myAQI.Rdata* which we generated in the Project *AQI_Import*.   
+
+
+```{r, load_clean_dataset, echo=TRUE}
+load("Data/myAQI.Rdata")
+str(myAQI)
+```
+
+# Logit Models
+
+# Four Predictors
+
+## Fixed Effects Model 
+
+Link : logit
+fitted with glm with **four** predictors: 
+
+formula0 <- ond ~ pay +age_group +sex
+
+```{r, log0, echo=TRUE, eval=everything}
+
+formula2.0 <- ond ~ pay +age_group +sex
+
+fit_log2.0 <- glm(formula2.0, 
+             family = binomial(link = "logit"), 
+             data = myAQI)
+```
+
+## Random Effects Model
+
+fitted with glmer and procedure as random effect
+
+```{r eval=everything, echo=TRUE}
+formulaR2.0 <- ond ~ pay +age_group +sex + (1 | cpt)
+
+m2.0 <- glmer(formulaR2.0, data = myAQI, family = binomial, 
+           control = glmerControl(optimizer = "bobyqa"),
+           nAGQ = 10)
+save(fit_log2.0, m2.0, file = "Results/results2.0.Rdata")
+```
+
+
+## Comparison of random versus Fixed effects model
+
+```{r}
+rm(list = ls())
+load("Results/results2.0.Rdata")
+```
+
+### Details Fixed Effects
+
+```{r}
+summary(fit_log2.0)
+p_values <- summary.glm((fit_log2.0))$coefficient[,4]
+ORfixed2.0 <- exp(coef(fit_log2.0)) # exponentiated coefficients 
+# CI_fitlog<- confint(fit_log) # 95% CI for the coefficients, takes too long
+kable(data.frame(ORfixed2.0, p_values), digits = 3, caption = "Results log2.0")
+```
+
+### Details Random Effects
+
+```{r}
+summary(m2.0)
+ORrandom2.0 <- exp(m2.0@beta) # exponentiated coefficients
+```
+
+
+### Random v. Fixed Side by Side 
+
+```{r}
+compareCoef2.0 <- data.frame(random=m2.0@beta, fixed=coef(fit_log2.0))
+kable(compareCoef2.0, caption = ("Coefficients"))
+
+compareOR2.0 <- data.frame(random=ORrandom2.0, fixed= ORfixed2.0)
+kable(compareOR2.0, caption = ("Odds ratios"))
+```
