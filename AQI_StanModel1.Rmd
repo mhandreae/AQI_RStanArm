@@ -25,6 +25,11 @@ rm(list = ls())
 everything<-FALSE
 ```
 
+```{r cores}
+library(parallel)
+detectCores()
+```
+
 # Load cleaned complete case dataset
  
 we load the cleaned dataset with procedure information *myAQI.Rdata* which we generated in the Project *AQI_Import*.   
@@ -102,4 +107,16 @@ kable(compareCoef2.0, caption = ("Coefficients"))
 
 compareOR2.0 <- data.frame(random=ORrandom2.0, fixed= ORfixed2.0)
 kable(compareOR2.0, caption = ("Odds ratios"))
+```
+
+## Stan Random Effects Model
+
+fitted with stan_glmer and procedure as random effect
+
+```{r eval=everything, echo=TRUE}
+formulaR2.0 <- ond ~ pay +age_group +sex + (1 | cpt)
+
+stanfit2.0 <- stan_glmer(formulaR2.0, data = myAQI, family = binomial, iter= 100, cores =2)
+
+save(stanfit2.0, file = "Results/stanfit2.0.Rdata")
 ```
