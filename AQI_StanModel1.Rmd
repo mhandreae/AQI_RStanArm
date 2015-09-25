@@ -121,7 +121,10 @@ formula0 <- ond ~ pay +age_group +sex
 formula2.0 <- ond ~ pay +age_group +sex
 
 stanfitfix2.0 <- stan_glm(formula2.0, 
-             family = binomial(link = "logit"), iter= 100, cores= 2)
+             family = binomial(link = "logit"), 
+             data = myAQI,
+             iter= 100, cores= 2)
+
 save(stanfitfix2.0, file = "Results/stanfitfix2.0.Rdata")
 
 ```
