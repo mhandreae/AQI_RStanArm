@@ -109,6 +109,25 @@ compareOR2.0 <- data.frame(random=ORrandom2.0, fixed= ORfixed2.0)
 kable(compareOR2.0, caption = ("Odds ratios"))
 ```
 
+# Stan Models
+
+## Stan Fixed Effects Model 
+
+Link : logit
+fitted with glm with **four** predictors: 
+
+formula0 <- ond ~ pay +age_group +sex
+
+```{r, log0, echo=TRUE, eval=everything}
+
+formula2.0 <- ond ~ pay +age_group +sex
+
+stanfitfix2.0 <- stan_glm(formula2.0, 
+             family = binomial(link = "logit"), iter= 100, cores= 2)
+save(stanfitfix2.0, file = "Results/stanfitfix2.0.Rdata")
+
+```
+
 ## Stan Random Effects Model
 
 fitted with stan_glmer and procedure as random effect
