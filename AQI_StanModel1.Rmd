@@ -74,8 +74,6 @@ save(fit_log2.0, m2.0, file = "Results/results2.0.Rdata")
 ```
 
 
-## Comparison of random versus Fixed effects model
-
 ```{r}
 rm(list = ls())
 load("Results/results2.0.Rdata")
@@ -123,7 +121,10 @@ formula0 <- ond ~ pay +age_group +sex
 formula2.0 <- ond ~ pay +age_group +sex
 
 stanfitfix2.0 <- stan_glm(formula2.0, 
-             family = binomial(link = "logit"), iter= 100, cores= 2)
+             family = binomial(link = "logit"), 
+             data = myAQI,
+             iter= 100, cores= 2)
+
 save(stanfitfix2.0, file = "Results/stanfitfix2.0.Rdata")
 
 ```
@@ -139,3 +140,19 @@ stanfit2.0 <- stan_glmer(formulaR2.0, data = myAQI, family = binomial, iter= 100
 
 save(stanfit2.0, file = "Results/stanfit2.0.Rdata")
 ```
+=======
+fit1 <-stan_glm(mpg ~ wt, data = mtcars)
+
+ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
+trt <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
+weight <- c(ctl, trt)
+fit <- stan_glm(weight ~ group)
+coef(fit)
+
+counts <- c(18,17,15,20,10,20,25,13,12)
+outcome <- gl(3,1,9)
+treatment <- gl(3,3)
+stan_glm(counts ~ outcome + treatment, family = poisson())
+}
+>>>>>>> origin/master
