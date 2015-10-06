@@ -142,18 +142,44 @@ stan_plot(stanfitfix2.0)
 
 fitted with stan_glmer and procedure as random effect does run into memory problems:
 
- Error: cannot allocate vector of size 2.7 Gb 
-5 structure(.Internal(La_qr(x)), useLAPACK = TRUE, class = "qr") 
-4 qr.default(x, tol = .Machine$double.eps, LAPACK = TRUE) 
-3 qr(x, tol = .Machine$double.eps, LAPACK = TRUE) at stanreg.R#11
-2 stanreg(fit) at stan_glmer.R#95
-1 stan_glmer(formulaR2.0, data = myAQI, family = binomial, iter = 10, 
-    cores = 2) 
-
+    
 ```{r eval=everything, echo=TRUE}
 formulaR2.0 <- ond ~ pay +age_group +sex + (1 | cpt)
 
 stanfit2.0 <- stan_glmer(formulaR2.0, data = myAQI, family = binomial, iter= 10, cores =2)
 
 save(stanfit2.0, file = "Results/stanfit2.0.Rdata")
+```
+ 
+ *Error: cannot allocate vector of size 2.7 Gb 
+5 structure(.Internal(La_qr(x)), useLAPACK = TRUE, class = "qr") 
+4 qr.default(x, tol = .Machine$double.eps, LAPACK = TRUE) 
+3 qr(x, tol = .Machine$double.eps, LAPACK = TRUE) at stanreg.R#11
+2 stanreg(fit) at stan_glmer.R#95
+1 stan_glmer(formulaR2.0, data = myAQI, family = binomial, iter = 10, 
+    cores = 2) 
+    
+ traceback()
+5: structure(.Internal(La_qr(x)), useLAPACK = TRUE, class = "qr")
+4: qr.default(x, tol = .Machine$double.eps, LAPACK = TRUE)
+3: qr(x, tol = .Machine$double.eps, LAPACK = TRUE) at stanreg.R#11
+2: stanreg(fit) at stan_glmer.R#95
+1: stan_glmer(formulaR2.0, data = myAQI, family = binomial, iter = 10, 
+       cores = 2)*
+
+### reducing the data set/ number of random effects
+We try to fit the same model on fewer random effects by reducing to a smaller dataset.
+
+```{r}
+reduxAQI <- myAQI[1:10000,]
+length(unique(reduxAQI$cpt))
+length(unique(myAQI$cpt))
+```
+
+```{r eval=everything, echo=TRUE}
+formulaR2.0 <- ond ~ pay +age_group +sex + (1 | cpt)
+
+stanfitredux2.0 <- stan_glmer(formulaR2.0, data = reduxAQI, family = binomial, iter= 1000, cores =2)
+
+save(stanfitredux2.0, file = "Results/stanfitredux2.0.Rdata")
 ```
