@@ -171,7 +171,7 @@ save(stanfit2.0, file = "Results/stanfit2.0.Rdata")
 We try to fit the same model on fewer random effects by reducing to a smaller dataset.
 
 ```{r}
-reduxAQI <- myAQI[1:10000,]
+reduxAQI <- myAQI[1:30000,]
 length(unique(reduxAQI$cpt))
 length(unique(myAQI$cpt))
 ```
