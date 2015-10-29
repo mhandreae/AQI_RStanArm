@@ -37,7 +37,7 @@ we load the cleaned dataset with procedure information *ccAQI_cpt_cpt.Rdata* whi
 
 
 ```{r, load_clean_dataset, echo=TRUE}
-load("Data/ccAQI_cpt_cpt.Rdata")
+load("Data/myAQI_cpt.Rdata")
 str(ccAQI_cpt)
 ```
 
