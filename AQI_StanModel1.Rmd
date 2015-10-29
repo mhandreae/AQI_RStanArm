@@ -12,6 +12,7 @@ library(knitr) # required to set options in Markdown R
 library(lme4)
 library(rstan)
 library(rstanarm)
+
 # library(nlme)
 ```
 
@@ -32,12 +33,12 @@ detectCores()
 
 # Load cleaned complete case dataset
  
-we load the cleaned dataset with procedure information *myAQI.Rdata* which we generated in the Project *AQI_Import*.   
+we load the cleaned dataset with procedure information *ccAQI_cpt_cpt.Rdata* which we generated in the Project *AQI_Import*, updated on 29Oct2015.   
 
 
 ```{r, load_clean_dataset, echo=TRUE}
-load("Data/myAQI.Rdata")
-str(myAQI)
+load("Data/ccAQI_cpt_cpt.Rdata")
+str(ccAQI_cpt)
 ```
 
 # Logit Models
@@ -57,7 +58,7 @@ formula2.0 <- ond ~ pay +age_group +sex
 
 fit_log2.0 <- glm(formula2.0, 
              family = binomial(link = "logit"), 
-             data = myAQI)
+             data = ccAQI_cpt)
 ```
 
 ## Random Effects Model
@@ -67,7 +68,7 @@ fitted with glmer and procedure as random effect
 ```{r eval=everything, echo=TRUE}
 formulaR2.0 <- ond ~ pay +age_group +sex + (1 | cpt)
 
-m2.0 <- glmer(formulaR2.0, data = myAQI, family = binomial, 
+m2.0 <- glmer(formulaR2.0, data = ccAQI_cpt, family = binomial, 
            control = glmerControl(optimizer = "bobyqa"),
            nAGQ = 10)
 save(fit_log2.0, m2.0, file = "Results/results2.0.Rdata")
@@ -123,7 +124,7 @@ formula2.0 <- ond ~ pay +age_group +sex
 
 stanfitfix2.0 <- stan_glm(formula2.0, 
              family = binomial(link = "logit"), 
-             data = myAQI,
+             data = ccAQI_cpt,
              iter= 1000, cores= 2)
 
 save(stanfitfix2.0, file = "Results/stanfitfix2.0.Rdata")
@@ -140,40 +141,34 @@ stan_plot(stanfitfix2.0)
 
 ## Stan Random Effects Model
 
+### Mixed effects model with one random effect
+
 fitted with stan_glmer and procedure as random effect does run into memory problems:
 
     
 ```{r eval=everything, echo=TRUE}
+library(rstanarm)
 formulaR2.0 <- ond ~ pay +age_group +sex + (1 | cpt)
-
-stanfit2.0 <- stan_glmer(formulaR2.0, data = myAQI, family = binomial, iter= 10, cores =2)
+#options(warn=2)
+options(warn=0)
+stanfit2.0 <- stan_glmer(formulaR2.0, data = ccAQI_cpt, family = binomial, chains = 4, iter=100, cores =4)
 
 save(stanfit2.0, file = "Results/stanfit2.0.Rdata")
 ```
  
  Error: cannot allocate vector of size 2.7 Gb 
-5 structure(.Internal(La_qr(x)), useLAPACK = TRUE, class = "qr") 
-4 qr.default(x, tol = .Machine$double.eps, LAPACK = TRUE) 
-3 qr(x, tol = .Machine$double.eps, LAPACK = TRUE) at stanreg.R#11
-2 stanreg(fit) at stan_glmer.R#95
-1 stan_glmer(formulaR2.0, data = myAQI, family = binomial, iter = 10, 
-    cores = 2) 
-    
- traceback()
-5: structure(.Internal(La_qr(x)), useLAPACK = TRUE, class = "qr")
-4: qr.default(x, tol = .Machine$double.eps, LAPACK = TRUE)
-3: qr(x, tol = .Machine$double.eps, LAPACK = TRUE) at stanreg.R#11
-2: stanreg(fit) at stan_glmer.R#95
-1: stan_glmer(formulaR2.0, data = myAQI, family = binomial, iter = 10, 
-       cores = 2)
+ 
+This error was overcome by increasing RAM and changing the program with Jonah.
 
 ### reducing the data set/ number of random effects
 We try to fit the same model on fewer random effects by reducing to a smaller dataset.
 
-```{r}
-reduxAQI <- myAQI[1:30000,]
+#### 30% reduction
+```{r, everything = TRUE}
+reduxAQI <- ccAQI_cpt[1:30000,]
 length(unique(reduxAQI$cpt))
-length(unique(myAQI$cpt))
+length(unique(ccAQI_cpt$cpt))
+save(reduxAQI, file = "Results/reduxAQI.Rdata")
 ```
 
 ```{r eval=everything, echo=TRUE}
@@ -182,4 +177,203 @@ formulaR2.0 <- ond ~ pay +age_group +sex + (1 | cpt)
 stanfitredux2.0 <- stan_glmer(formulaR2.0, data = reduxAQI, family = binomial, iter= 1000, cores =2)
 
 save(stanfitredux2.0, file = "Results/stanfitredux2.0.Rdata")
+```
+
+#### 50% reduction
+```{r}
+redux50AQI <- ccAQI_cpt[1:50000,]
+length(unique(redux50AQI$cpt))
+length(unique(ccAQI_cpt$cpt))
+```
+
+```{r eval=everything, echo=TRUE}
+formulaR2.0 <- ond ~ pay +age_group +sex + (1 | cpt)
+
+stanfitredux50p2.0 <- stan_glmer(formulaR2.0, data = redux50AQI, family = binomial, iter= 1000, cores =2)
+
+save(stanfitredux50p2.0, file = "Results/stanfitredux50p2.0.Rdata")
+```
+
+### Mixed effects model fitted with 2 random effects
+
+```{r eval=everything, echo=TRUE}
+formulaR3.0 <- ond ~ pay +age_group +sex + (1 | cpt) + (1 | prov)
+
+# +(prov|hospital) +(surgery|prov|hospital)
+# use update to only change component...
+# use fit$model <- NULL to remove the data  or fit$data or model=false??
+
+stanfitredux50p3.0 <- stan_glmer(formulaR3.0, data = reduxAQI, family = binomial, iter= 1000, cores =2)
+
+save(stanfitredux50p3.0, file = "Results/stanfitredux50p3.0.Rdata")
+```
+
+### Mixed effects model fitted with 2 random effects for full data set
+
+```{r eval=everything, echo = TRUE}
+require(rstanarm)
+rm(stanfit3.0)
+formulaR3.0 <- ond ~ pay +age_group +sex + (1 | cpt) + (1 | prov)
+
+# +(prov|hospital) +(surgery|prov|hospital)
+# use update to only change component...
+# use fit$model <- NULL to remove the data  or fit$data or model=false??
+
+stanfit3.0 <- stan_glmer(formulaR3.0, data = ccAQI_cpt, family = binomial, chains = 4, iter= 500, cores =4)
+
+save(stanfit3.0, file = "Results/stanfit 3.0.Rdata")
+```
+
+### Mixed effects model fitted with 2 random effects for full data set
+
+```{r eval=everything, echo = TRUE}
+require(rstanarm)
+rm(stanfit4.0)
+formulaR4.0 <- ond ~ pay +age_group +sex + (1 | cpt) + (prov | practice)
+
+# +(prov|hospital) +(surgery|prov|hospital)
+# use update to only change component...
+# use fit$model <- NULL to remove the data  or fit$data or model=false??
+
+stanfit4.0 <- stan_glmer(formulaR4.0, data = ccAQI_cpt, family = binomial, chains = 4, iter= 100, cores =4)
+
+save(stanfit4.0, file = "Results/stanfit4.0.Rdata")
+```
+
+FormulaR4.0 seems to get stuck in warm up
+
+### Mixed effects model fitted with hierarchical random effects for full data set
+
+```{r eval=everything, echo = TRUE}
+require(rstanarm)
+rm(stanfit5.0)
+formulaR5.0 <- ond ~ pay +age_group +sex + (cpt | prov) 
+
+# +(prov|hospital) +(surgery|prov|hospital)
+# use update to only change component...
+# use fit$model <- NULL to remove the data  or fit$data or model=false??
+
+stanfit5.0 <- stan_glmer(formulaR5.0, data = ccAQI_cpt, family = binomial, chains = 4, iter= 10, cores =4)
+
+save(stanfit5.0, file = "Results/stanfit5.0.Rdata")
+```
+
+FormulaR5.0 runs into memory problems:
+stanfit5.0 <- stan_glmer(formulaR5.0, data = ccAQI_cpt, family = binomial, chains = 4, iter= 10, cores =4)
+Warning messages:
+1: In as.vector(mm[, ii]) :
+  Reached total allocation of 12287Mb: see help(memory.size)
+2: In as.vector(mm[, ii]) :
+  Reached total allocation of 12287Mb: see help(memory.size)
+3: In as.vector(mm[, ii]) :
+  Reached total allocation of 12287Mb: see help(memory.size)
+4: In as.vector(mm[, ii]) :
+  Reached total allocation of 12287Mb: see help(memory.size)
+ Show Traceback
+ 
+ Rerun with Debug
+ Error in t(do.call(sparseMatrix, do.call(rBind, lapply(seq_along(blist),  : 
+  error in evaluating the argument 'x' in selecting a method for function 't': Error: cannot allocate vector of size 13.2 Gb 
+  
+### More fixed effects with two random effects model
+
+```{r eval=everything, echo = TRUE}
+require(rstanarm)
+load("Data/ccAQI_cpt.Rdata")
+rm(stanfit6.0)
+formulaR6.0 <- ond ~ pay + age_group + sex + ASA + anes_type + 
+  (1 | cpt) + (1 | prov)
+
+# +(prov|hospital) +(surgery|prov|hospital)
+# use update to only change component...
+# use fit$model <- NULL to remove the data  or fit$data or model=false??
+
+stanfit6.0 <- stan_glmer(formulaR6.0, data = ccAQI_cpt, family = binomial, chains = 4, iter= 500, cores =4)
+
+save(stanfit6.0, file = "Results/stanfit6.0.Rdata")
+```
+
+### even more fixed effects with two random effects model
+
+```{r eval=everything, echo = TRUE}
+require(rstanarm)
+load("Data/ccAQI_cpt.Rdata")
+rm(stanfit7.0)
+formulaR7.0 <- ond ~ pay + age_group + sex + ASA + anes_type + practice +
+  (1 | cpt) + (1 | prov)
+
+# +(prov|hospital) +(surgery|prov|hospital)
+# use update to only change component...
+# use fit$model <- NULL to remove the data  or fit$data or model=false??
+
+stanfit7.0 <- stan_glmer(formulaR7.0, data = ccAQI_cpt, family = binomial, chains = 4, iter= 500, cores =4)
+
+save(stanfit7.0, file = "Results/stanfit7.0.Rdata")
+```
+
+### emax model with log Link and two random effects model
+
+```{r eval=everything, echo = TRUE}
+require(rstanarm)
+require(shinystan)
+load("Data/ccAQI_cpt.Rdata")
+formulaR7.any <- any ~ pay + age_group + sex + ASA + anes_type + practice +
+  (1 | cpt) + (1 | prov)
+
+# +(prov|hospital) +(surgery|prov|hospital)
+# use update to only change component...
+# use fit$model <- NULL to remove the data  or fit$data or model=false??
+
+stanfit7.any <- stan_glmer(formulaR7.any, data = ccAQI_cpt, family = binomial, chains = 4, iter= 500, cores =4)
+
+save(stanfit7.any, file = "Results/stanfit7.any.Rdata")
+
+# Generate shinystan files to hasten launch
+
+## without ppcheck data
+shiny7.any <- as.shinystan(stanfit7.any, ppd = FALSE)
+save(shiny7.any, file = "Results/shiny7.any.Rdata")
+
+## With ppcheck data, which will take longer
+ppshiny7.any <- as.shinystan(stanfit7.any)
+#ppshiny7.any <- launch_shinystan(stanfit7.any)
+save(ppshiny7.any, file = "Results/ppshiny7.any.Rdata")
+```
+
+
+```{r}
+# Call shinystan to visualize results and check convergence
+load("Results/shiny7.any.Rdata")
+launch_shinystan(shiny7.any)
+```
+
+# Posterior predictive checking of Model
+```{r}
+require(rstanarm)
+rm(list=ls())
+rm(stanfit7.any)
+load("Results/ppshiny7.any.Rdata")
+load("Results/stanfit7.any.Rdata")
+
+class(stanfit7.any)
+ppcheck(stanfit7.any, check = "resid", nreps = 2)
+ppcheck(stanfit7.any, check = "test", test = mean)
+ppcheck(stanfit7.any, check = "test", test = sd)
+ppcheck(stanfit7.any, check = "dist", overlay = FALSE)
+
+```
+
+```{r}
+library(mailR)
+sender <- "mhandreae@gmail.com"
+recipients <- c("mhandreae@gmail.com")
+send.mail(from = sender,
+          to = recipients,
+          subject="FromR to you",
+          body = "done with project",
+          smtp = list(host.name = "smtp.gmail.com", port = 465, 
+                      user.name="mhandreae@gmail.com", passwd="0okm0okm",
+                      ssl=TRUE),
+          authenticate = TRUE,
+          send = TRUE)
 ```
