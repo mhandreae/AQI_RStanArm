@@ -401,4 +401,25 @@ save(stanfit8.any, file = "Results/stanfit8.any.Rdata")
 ## without ppcheck data
 shiny8.any <- as.shinystan(stanfit8.any, ppd = FALSE)
 save(shiny8.any, file = "Results/shiny8.any.Rdata")
+#```
+
+### Income median and insurance status as predictors with two random effects model
+
+#```{r eval=everything, echo = TRUE}
+rm(list=ls())
+require(rstanarm)
+require(shinystan)
+load("Data/myAQI_cpt.Rdata")
+formulaR9.any <- any ~ income + pay + age_group + sex + ASA + 
+  anes_type + practice + (1 | cpt) + (1 | prov)
+
+stanfit9.any <- stan_glmer(formulaR9.any, data = ccAQI_cpt, family = binomial(link=logit), chains = 4, iter= 10, cores =4)
+
+save(stanfit9.any, file = "Results/stanfit9.any.Rdata")
+
+# Generate shinystan files to hasten launch
+
+## without ppcheck data
+shiny9.any <- as.shinystan(stanfit9.any, ppd = FALSE)
+save(shiny9.any, file = "Results/shiny9.any.Rdata")
 ```
