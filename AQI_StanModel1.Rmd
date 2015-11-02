@@ -316,7 +316,7 @@ save(stanfit7.0, file = "Results/stanfit7.0.Rdata")
 ```{r eval=everything, echo = TRUE}
 require(rstanarm)
 require(shinystan)
-load("Data/ccAQI_cpt.Rdata")
+load("Data/myAQI_cpt.Rdata")
 formulaR7.any <- any ~ pay + age_group + sex + ASA + anes_type + practice +
   (1 | cpt) + (1 | prov)
 
@@ -376,4 +376,29 @@ send.mail(from = sender,
                       ssl=TRUE),
           authenticate = TRUE,
           send = TRUE)
+```
+
+### Income median as predictor with and without two random effects model
+
+```{r eval=everything, echo = TRUE}
+rm(list=ls())
+require(rstanarm)
+require(shinystan)
+load("Data/myAQI_cpt.Rdata")
+formulaR8.any <- any ~ income + age_group + sex + ASA + anes_type + practice +
+  (1 | cpt) + (1 | prov)
+
+# +(prov|hospital) +(surgery|prov|hospital)
+# use update to only change component...
+# use fit$model <- NULL to remove the data  or fit$data or model=false??
+
+stanfit8.any <- stan_glmer(formulaR8.any, data = ccAQI_cpt, family = binomial(link=logit), chains = 4, iter= 500, cores =4)
+
+save(stanfit8.any, file = "Results/stanfit8.any.Rdata")
+
+# Generate shinystan files to hasten launch
+
+## without ppcheck data
+shiny8.any <- as.shinystan(stanfit8.any, ppd = FALSE)
+save(shiny8.any, file = "Results/shiny8.any.Rdata")
 ```
