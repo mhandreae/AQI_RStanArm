@@ -422,4 +422,18 @@ save(stanfit9.any, file = "Results/stanfit9.any.Rdata")
 ## without ppcheck data
 shiny9.any <- as.shinystan(stanfit9.any, ppd = FALSE)
 save(shiny9.any, file = "Results/shiny9.any.Rdata")
+
+library(mailR)
+sender <- "mhandreae@gmail.com"
+recipients <- c("mhandreae@gmail.com")
+send.mail(from = sender,
+          to = recipients,
+          subject="FromR to you",
+          body = "done with project",
+          smtp = list(host.name = "smtp.gmail.com", port = 465, 
+                      user.name="mhandreae@gmail.com", passwd="0okm0okm",
+                      ssl=TRUE),
+          authenticate = TRUE,
+          send = TRUE)
+
 ```
