@@ -423,6 +423,26 @@ save(stanfit9.any, file = "Results/stanfit9.any.Rdata")
 shiny9.any <- as.shinystan(stanfit9.any, ppd = FALSE)
 save(shiny9.any, file = "Results/shiny9.any.Rdata")
 
+# combine incomeQ and pay
+
+rm(list=ls())
+require(rstanarm)
+require(shinystan)
+load("Data/myAQI_cpt.Rdata")
+formulaR10.any <- any ~ incomeQ  + +pay + age_group + sex + ASA + 
+  anes_type + practice + (1 | cpt) + (1 | prov)
+
+stanfit10.any <- stan_glmer(formulaR10.any, data = ccAQI_cpt, family = binomial(link=logit), chains = 4, iter= 500, cores =4)
+
+save(stanfit10.any, file = "Results/stanfit10.any.Rdata")
+
+# Generate shinystan files to hasten launch
+
+## without ppcheck data
+shiny10.any <- as.shinystan(stanfit10.any, ppd = FALSE)
+save(shiny10.any, file = "Results/shiny10.any.Rdata")
+
+
 library(mailR)
 sender <- "mhandreae@gmail.com"
 recipients <- c("mhandreae@gmail.com")
