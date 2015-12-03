@@ -489,3 +489,23 @@ r## without ppcheck data
 shinyRn1.any <- as.shinystan(stanfitRn1.any, ppd = FALSE)
 save(shinyRn1.any, file = "Results/shinyRn1.any.Rdata")
 ```
+
+# Model with random effects or cpt nested in providers
+
+```{r}
+
+rm(list=ls())
+require(rstanarm)
+require(shinystan)
+load("Data/myAQI_cpt.Rdata")
+formulaRn2.any <- any ~ incomeQ + age_group + sex + ASA + 
+  anes_type + practice + (cpt| prov) + practice
+
+stanfitRn2.any <- stan_glmer(formulaRn2.any, data = ccAQI_cpt, family = binomial(link=logit), chains = 4, iter= 200, cores =4)
+
+save(stanfitRn2.any, file = "Results/stanfitRn2.any.Rdata")
+
+## without ppcheck data
+shinyRn2.any <- as.shinystan(stanfitRn2.any, ppd = FALSE)
+save(shinyRn2.any, file = "Results/shinyRn2.any.Rdata")
+```
