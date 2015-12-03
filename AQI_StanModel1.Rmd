@@ -474,13 +474,18 @@ stanfitRn1.any <- stan_glmer(formulaRn1.any, data = ccAQI_cpt, family = binomial
 save(stanfitRn1.any, file = "Results/stanfitRn1.any.Rdata")
 
 # extract possible inits and then set them
-fit0 <- stan_glm(mpg ~ wt + cyl, data = mtcars, iter = 1)
-inits <- rstan::get_inits(fit0$stanfit)
-inits[[1]]$alpha <- 0.5
-fit <- stan_glm(mpg ~ wt + cyl, data = mtcars, init = inits)
+# fit0 <- stan_glm(mpg ~ wt + cyl, data = mtcars, iter = 1)
+# inits <- rstan::get_inits(fit0$stanfit)
+# inits[[1]]$alpha <- 0.5
+# fit <- stan_glm(mpg ~ wt + cyl, data = mtcars, init = inits)
 # Generate shinystan files to hasten launch
 
-## without ppcheck data
+# Rerun but with the previous estimates as inits for faster warmup..?
+mystanfit <- stanfitRn1.any$stanfit
+inits <- rstan::get_inits(mystanfit) #needs stanfit object
+stanfitRn1.any.init <- stan_glmer(formulaRn1.any, data = ccAQI_cpt, family = binomial(link=logit), chains = 4, iter= 200, cores =4, init = inits)
+
+r## without ppcheck data
 shinyRn1.any <- as.shinystan(stanfitRn1.any, ppd = FALSE)
 save(shinyRn1.any, file = "Results/shinyRn1.any.Rdata")
 ```
