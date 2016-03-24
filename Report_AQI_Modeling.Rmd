@@ -1,0 +1,36 @@
+---
+title: "Report on AQI Bayesian hierarchical modeling"
+author: "Michael Andreae"
+date: "March 24, 2016"
+output: pdf_document
+---
+
+we build various random effects model with either insurance status (pay) or median income in the home zip code of the patients as primary predictor and added variables like institution or procedure cpt codes as random effects, sometimes nested.
+
+```{r, packages, message=FALSE, echo=FALSE, warning=FALSE}
+library(knitr) # required to set options in Markdown R
+library(lme4)
+library(rstan)
+library(rstanarm)
+library(shinystan)
+# library(nlme)
+```
+
+```{r, global_options, echo=FALSE}
+# set options
+opts_chunk$set(fig.width=6, fig.height=4, fig.path='Figs/',
+               echo=FALSE, warning=FALSE, message=FALSE)
+rm(list = ls())
+everything <- FALSE
+```
+
+```{r cores}
+library(parallel)
+detectCores()
+```
+
+```{r stanfit3.0, eval=FALSE}
+model_name <- "stanfit 3.0"
+file_path <- file.path("Results", paste0(model_name,".Rdata"))
+load(file_path)
+```

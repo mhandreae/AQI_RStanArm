@@ -350,16 +350,18 @@ launch_shinystan(shiny7.any)
 # Posterior predictive checking of Model
 ```{r}
 require(rstanarm)
+require(shinystan)
+require(arm)
 rm(list=ls())
 rm(stanfit7.any)
 load("Results/ppshiny7.any.Rdata")
 load("Results/stanfit7.any.Rdata")
 
 class(stanfit7.any)
-ppcheck(stanfit7.any, check = "resid", nreps = 2)
-ppcheck(stanfit7.any, check = "test", test = mean)
-ppcheck(stanfit7.any, check = "test", test = sd)
-ppcheck(stanfit7.any, check = "dist", overlay = FALSE)
+pp_check(stanfit7.any, check = "resid", nreps = 2)
+pp_check(stanfit7.any, check = "test", test = mean)
+pp_check(stanfit7.any, check = "test", test = sd)
+pp_check(stanfit7.any, check = "dist", overlay = FALSE)
 
 ```
 
