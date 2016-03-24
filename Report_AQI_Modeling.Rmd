@@ -21,7 +21,7 @@ library(shinystan)
 opts_chunk$set(fig.width=6, fig.height=4, fig.path='Figs/',
                echo=FALSE, warning=FALSE, message=FALSE)
 rm(list = ls())
-everything <- FALSE
+everything <- TRUE
 ```
 
 ```{r cores}
@@ -29,8 +29,23 @@ library(parallel)
 detectCores()
 ```
 
-```{r stanfit3.0, eval=FALSE}
-model_name <- "stanfit 3.0"
+```{r stanfit3.0, eval=everything}
+require(rstanarm)
+
+## model and path
+model_name <- "stanfit 3.0" # used in path
+model.name <- "stanfit3.0"  # used in R
+summary_name <- paste0(model.name, ".summary")
+
+## load
 file_path <- file.path("Results", paste0(model_name,".Rdata"))
+file_path.summary <- file.path("Results", paste0(model_name,"_summary.Rdata"))
+
 load(file_path)
+assign("fit",get(model.name))
+
+## extract
+summary.fit <- summary(fit, pars="beta", probs=c(0.025, 0.5, 0.975), digits=2)
+assign(summary_name, summary.fit)
+save(summary_name, file = file_path.summary)
 ```
