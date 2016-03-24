@@ -48,4 +48,5 @@ assign("fit",get(model.name))
 summary.fit <- summary(fit, pars="beta", probs=c(0.025, 0.5, 0.975), digits=2)
 assign(summary_name, summary.fit)
 save(summary_name, file = file_path.summary)
+get(summary_name)
 ```
