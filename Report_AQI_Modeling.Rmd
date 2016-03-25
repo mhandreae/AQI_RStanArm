@@ -31,11 +31,13 @@ detectCores()
 
 ```{r stanfit3.0, eval=everything}
 require(rstanarm)
-
+require(knitr)
 ## model and path
 model_name <- "stanfit 3.0" # used in path
 model.name <- "stanfit3.0"  # used in R
 summary_name <- paste0(model.name, ".summary")
+formulary_name <- paste0(model.name, ".formula")
+coefficient_name <- paste0(model.name, ".coefficients")
 
 ## load
 file_path <- file.path("Results", paste0(model_name,".Rdata"))
@@ -44,9 +46,16 @@ file_path.summary <- file.path("Results", paste0(model_name,"_summary.Rdata"))
 load(file_path)
 assign("fit",get(model.name))
 
-## extract
+## extract summary
 summary.fit <- summary(fit, pars="beta", probs=c(0.025, 0.5, 0.975), digits=2)
 assign(summary_name, summary.fit)
-save(summary_name, file = file_path.summary)
+assign(formulary_name, fit$formula)
+assign(coefficient_name, fit$coefficients[1:20])
+
+save(summary_name,formulary_name,coefficient_name, file = file_path.summary)
+
 get(summary_name)
+get(formulary_name)
+OR.table <- as.data.frame(exp(get(coefficient_name)))
+kable(OR.table)
 ```
