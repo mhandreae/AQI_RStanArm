@@ -21,7 +21,7 @@ library(shinystan)
 opts_chunk$set(fig.width=6, fig.height=4, fig.path='Figs/',
                echo=FALSE, warning=FALSE, message=FALSE)
 rm(list = ls())
-everything <- TRUE
+everything <- FALSE
 ```
 
 ```{r cores}
@@ -29,39 +29,109 @@ library(parallel)
 detectCores()
 ```
 
-```{r stanfit3.0, eval=everything}
+```{r function_extract_summary}
+extract.summary <- function(model_name, model.name){
+ # function to extract summary, formula and coefficients from a stan.reg object
+ # takes model name as character string as described below and 
+ # returns a list with summary, formula and coefficients
+ 
+ ## model and path
+ # model_name <- used in path
+ # model.name <- used in R
+ require(rstanarm)
+ require(knitr)
+  
+ summary_name <- paste0(model.name, ".summary")
+ formula_name <- paste0(model.name, ".formula")
+ coefficient_name <- paste0(model.name, ".coefficients")
 
-for(i in 1:2){
-  rm(list=ls())
+ ## load
+ file_path <- file.path("Results", paste0(model_name,".Rdata"))
+ file_path.summary <- file.path("Results", paste0(model_name,"_summary.Rdata"))
 
-require(rstanarm)
-require(knitr)
-mymodels <- c("stanfit4.0","stanfit5.0")
-## model and path
-model_name <- mymodels[i] # used in path
-model.name <- "stanfit3.0"  # used in R
-summary_name <- paste0(model.name, ".summary")
-formulary_name <- paste0(model.name, ".formula")
-coefficient_name <- paste0(model.name, ".coefficients")
+ load(file_path)
+ assign("fit",get(model.name))
 
-## load
-file_path <- file.path("Results", paste0(model_name,".Rdata"))
-file_path.summary <- file.path("Results", paste0(model_name,"_summary.Rdata"))
+ ## extract summary
+ summary.fit <- summary(fit, pars="beta", probs=c(0.025, 0.5, 0.975), digits=2)
+ assign(summary_name, summary.fit)
+ assign(formula_name, fit$formula)
+ assign(coefficient_name, fit$coefficients[1:20])
 
-load(file_path)
-assign("fit",get(model.name))
-
-## extract summary
-summary.fit <- summary(fit, pars="beta", probs=c(0.025, 0.5, 0.975), digits=2)
-assign(summary_name, summary.fit)
-assign(formulary_name, fit$formula)
-assign(coefficient_name, fit$coefficients[1:20])
-
-save(summary_name,formulary_name,coefficient_name, file = file_path.summary)
-
-get(summary_name)
-get(formulary_name)
-OR.table <- as.data.frame(exp(get(coefficient_name)))
-kable(OR.table)
+ save(list = c(summary_name, formula_name, coefficient_name), 
+      file = file_path.summary)
+ return(list(get(summary_name),get(formula_name),get(coefficient_name)))
 }
 ```
+
+```{r function_print.my.summary}
+print.my.summary <- function(summary.list){
+ # function to print the elements of the summary list 
+ # returned by the function extract.summary
+ require(knitr)  
+ print(summary.list[1])
+ print(summary.list[2])
+ OR.table <- as.data.frame(exp(summary.list[[3]]))
+ names(OR.table)[1] <- "odds.ratios"
+ kable(OR.table)
+}
+```
+
+```{r function_print_my_odds_ratios}
+Print.my.odds.ratios <- function(modelname){
+ model.name <- modelname
+ summary_name <- paste0(model.name, ".summary")
+ formula_name <- paste0(model.name, ".formula")
+ coefficient_name <- paste0(model.name, ".coefficients")
+ file_path <- file.path("Results", paste0(model.name,"_summary.Rdata"))
+ load(file=file_path)
+ print(get(formula_name))
+ OR.table <- as.data.frame(exp(get(coefficient_name)))
+ names(OR.table)[1] <- "odds.ratios"
+ kable(OR.table)
+}
+```
+
+```{r extract_summaries, eval=everything}
+summary.list<- extract.summary("stanfit3.0","stanfit3.0")
+summary.list<- extract.summary("stanfit4.0","stanfit4.0")
+summary.list<- extract.summary("stanfit6.0","stanfit6.0")
+summary.list<- extract.summary("stanfit7.0","stanfit7.0")
+summary.list<- extract.summary("stanfit8.0","stanfit8.0")
+```
+
+# Model summaries
+
+## Stanfit 3.0
+```{r stanfit3.0}
+load("Results/stanfit3.0_summary.Rdata")
+Print.my.odds.ratios("stanfit3.0")
+```
+
+## Stanfit 4.0
+```{r stanfit4.0}
+load("Results/stanfit4.0_summary.Rdata")
+Print.my.odds.ratios("stanfit4.0")
+```
+
+Nesting providers in institutions distorted results.
+
+## Stanfit 6.0
+```{r stanfit6.0}
+load("Results/stanfit6.0_summary.Rdata")
+Print.my.odds.ratios("stanfit6.0")
+```
+
+## Stanfit 7.0
+```{r stanfit7.0}
+load("Results/stanfit7.0_summary.Rdata")
+Print.my.odds.ratios("stanfit7.0")
+```
+
+## Stanfit 8.0
+```{r stanfit8.0, eval=FALSE}
+load("Results/stanfit8.0_summary.Rdata")
+Print.my.odds.ratios("stanfit8.0")
+```
+log link did not converge
+
