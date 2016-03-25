@@ -30,10 +30,15 @@ detectCores()
 ```
 
 ```{r stanfit3.0, eval=everything}
+
+for(i in 1:2){
+  rm(list=ls())
+
 require(rstanarm)
 require(knitr)
+mymodels <- c("stanfit4.0","stanfit5.0")
 ## model and path
-model_name <- "stanfit 3.0" # used in path
+model_name <- mymodels[i] # used in path
 model.name <- "stanfit3.0"  # used in R
 summary_name <- paste0(model.name, ".summary")
 formulary_name <- paste0(model.name, ".formula")
@@ -58,4 +63,5 @@ get(summary_name)
 get(formulary_name)
 OR.table <- as.data.frame(exp(get(coefficient_name)))
 kable(OR.table)
+}
 ```
