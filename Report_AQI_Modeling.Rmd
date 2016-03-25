@@ -145,3 +145,21 @@ summary.list<- extract.summary("stanfit10.any")
 load("Results/stanfit7.any_summary.Rdata")
 Print.my.odds.ratios("stanfit7.any")
 ```
+
+## Stanfit8.any
+```{r stanfit8.any}
+load("Results/stanfit8.any_summary.Rdata")
+Print.my.odds.ratios("stanfit8.any")
+```
+
+## Stanfit9.any
+```{r stanfit9.any}
+load("Results/stanfit9.any_summary.Rdata")
+Print.my.odds.ratios("stanfit9.any")
+```
+
+## Stanfit10.any
+```{r stanfit10.any}
+load("Results/stanfit10.any_summary.Rdata")
+Print.my.odds.ratios("stanfit7.any")
+```
