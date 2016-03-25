@@ -5,7 +5,7 @@ date: "March 24, 2016"
 output: pdf_document
 ---
 
-we build various random effects model with either insurance status (pay) or median income in the home zip code of the patients as primary predictor and added variables like institution or procedure cpt codes as random effects, sometimes nested.
+We build various random effects model with either insurance status (pay) or median income in the home zip code of the patients as primary predictor and added variables like institution or procedure cpt codes as random effects, sometimes nested.
 
 ```{r, packages, message=FALSE, echo=FALSE, warning=FALSE}
 library(knitr) # required to set options in Markdown R
@@ -75,6 +75,7 @@ print.my.summary <- function(summary.list){
 
 ```{r function_print_my_odds_ratios}
 Print.my.odds.ratios <- function(modelname){
+ require(knitr)
  model.name <- modelname
  summary_name <- paste0(model.name, ".summary")
  formula_name <- paste0(model.name, ".formula")
@@ -84,9 +85,11 @@ Print.my.odds.ratios <- function(modelname){
  print(get(formula_name))
  OR.table <- as.data.frame(exp(get(coefficient_name)))
  names(OR.table)[1] <- "odds.ratios"
- kable(OR.table)
+ kable(OR.table, digits = 3)
 }
 ```
+
+# Model summaries outcome: ondansetron administration
 
 ```{r extract_summaries, eval=everything}
 summary.list<- extract.summary("stanfit3.0","stanfit3.0")
@@ -95,8 +98,6 @@ summary.list<- extract.summary("stanfit6.0","stanfit6.0")
 summary.list<- extract.summary("stanfit7.0","stanfit7.0")
 summary.list<- extract.summary("stanfit8.0","stanfit8.0")
 ```
-
-# Model summaries outcome: ondansetron administration
 
 ## Stanfit 3.0
 ```{r stanfit3.0}
@@ -145,6 +146,7 @@ summary.list<- extract.summary("stanfit10.any")
 load("Results/stanfit7.any_summary.Rdata")
 Print.my.odds.ratios("stanfit7.any")
 ```
+
 
 ## Stanfit8.any
 ```{r stanfit8.any}
