@@ -77,7 +77,7 @@ print.my.summary <- function(summary.list){
 Print.my.odds.ratios <- function(modelname){
  require(knitr)
  model.name <- modelname
- summary_name <- paste0(model.name, ".summary")
+   summary_name <- paste0(model.name, ".summary")
  formula_name <- paste0(model.name, ".formula")
  coefficient_name <- paste0(model.name, ".coefficients")
  file_path <- file.path("Results", paste0(model.name,"_summary.Rdata"))
@@ -86,6 +86,23 @@ Print.my.odds.ratios <- function(modelname){
  OR.table <- as.data.frame(exp(get(coefficient_name)))
  names(OR.table)[1] <- "odds.ratios"
  kable(OR.table, digits = 3)
+}
+```
+
+```{r function_return_odds_ratios}
+Return.odds.ratios <- function(modelname){
+ require(knitr)
+ model.name <- modelname
+   summary_name <- paste0(model.name, ".summary")
+ formula_name <- paste0(model.name, ".formula")
+ coefficient_name <- paste0(model.name, ".coefficients")
+ file_path <- file.path("Results", paste0(model.name,"_summary.Rdata"))
+ load(file=file_path)
+ print(get(formula_name))
+ OR.table <- as.data.frame(exp(get(coefficient_name)))
+ names(OR.table)[1] <- "odds.ratios"
+ kable(OR.table, digits = 3)
+ return(OR.table)
 }
 ```
 
@@ -120,9 +137,24 @@ Print.my.odds.ratios("stanfit6.0")
 ```
 
 ## Stanfit 7.0
-```{r stanfit7.0}
+```{r stanfit7.0, eval=FALSE}
+require(rstanarm)
+require(dplyr)
+#load("Results/stanfit7.0_summary.Rdata")
+load("Results/stanfit7.0.Rdata")
+post.interval <- as.data.frame(posterior_interval(stanfit7.0, prob = c(0.95))[1:20,])
+OR.TABLE <-Return.odds.ratios("stanfit7.0")
+results.table <- bind_cols(OR.TABLE,post.interval)
+rownames(results.table) <- rownames(OR.TABLE)
+save(results.table, file = "Results/Results7.0.Rdata")
+```
+
+```{r report_stanfit7.0}
+require(knitr)
+load(file = "Results/Results7.0.Rdata")
 load("Results/stanfit7.0_summary.Rdata")
 Print.my.odds.ratios("stanfit7.0")
+kable(results.table, digits = 3)
 ```
 
 ## Stanfit 8.0
@@ -163,5 +195,5 @@ Print.my.odds.ratios("stanfit9.any")
 ## Stanfit10.any
 ```{r stanfit10.any}
 load("Results/stanfit10.any_summary.Rdata")
-Print.my.odds.ratios("stanfit7.any")
+Print.my.odds.ratios("stanfit10.any")
 ```
