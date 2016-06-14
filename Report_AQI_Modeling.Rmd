@@ -5,7 +5,7 @@ date: "March 24, 2016"
 output: pdf_document
 ---
 
-We build various random effects model with either insurance status (pay) or median income in the home zip code of the patients as primary predictor and added variables like institution or procedure cpt codes as random effects, sometimes nested.
+We build various random effects model with either insurance status [**pay**] or median income [**IncomeQ**] (as quantile) in the home zip code of the patients as primary predictor and added as fixed effects demographics like institution [**practice**], gender [**sex**], ASA classification [**ASA**] and as random effects procedure [**cpt**] code or anesthesia provider [**provider**]. The models are more formally described in Appendix 1.
 
 ```{r, packages, message=FALSE, echo=FALSE, warning=FALSE}
 library(knitr) # required to set options in Markdown R
@@ -106,7 +106,7 @@ Return.odds.ratios <- function(modelname){
 }
 ```
 
-# Model summaries outcome: ondansetron administration
+# Model summaries for the primary outcome [ond]: ondansetron administration
 
 ```{r extract_summaries, eval=everything}
 summary.list<- extract.summary("stanfit3.0","stanfit3.0")
@@ -137,6 +137,9 @@ Print.my.odds.ratios("stanfit6.0")
 ```
 
 ## Stanfit 7.0
+
+This was the model we reported in detail in the manuscript.
+
 ```{r stanfit7.0, eval=FALSE}
 require(rstanarm)
 require(dplyr)
@@ -165,7 +168,7 @@ Print.my.odds.ratios("stanfit8.0")
 ```
 log link did not converge
 
-# Model summaries outcome any antiemetic adminstration
+# Model summaries for the outcome [**any**] antiemetic adminstration
 
 ```{r extract_summaries_any_antiemetic, eval=everything}
 summary.list<- extract.summary("stanfit7.any")
@@ -198,3 +201,4 @@ Print.my.odds.ratios("stanfit9.any")
 load("Results/stanfit10.any_summary.Rdata")
 Print.my.odds.ratios("stanfit10.any")
 ```
+
