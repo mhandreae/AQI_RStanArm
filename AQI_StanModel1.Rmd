@@ -524,7 +524,7 @@ formulaR7s.0 <- ond ~ pay + age_group + sex + ASA + anes_type + practice +
 # use update to only change component...
 # use fit$model <- NULL to remove the data  or fit$data or model=false??
 
-stanfit7s.0 <- stan_glmer(formulaRS7.0, data = ccAQI_cpt, family = binomial, chains = 4, iter= 500, cores =4)
+stanfit7s.0 <- stan_glmer(formulaR7s.0, data = ccAQI_cpt, family = binomial, chains = 4, iter= 500, cores =4)
 
 save(stanfit7s.0, file = "Results/stanfit7s.0.Rdata")
 ```
