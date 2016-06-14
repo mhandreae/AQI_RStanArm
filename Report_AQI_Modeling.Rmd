@@ -143,10 +143,11 @@ require(dplyr)
 #load("Results/stanfit7.0_summary.Rdata")
 load("Results/stanfit7.0.Rdata")
 post.interval <- as.data.frame(posterior_interval(stanfit7.0, prob = c(0.95))[1:20,])
+post.interval.exp <- exp(post.interval)
 OR.TABLE <-Return.odds.ratios("stanfit7.0")
-results.table <- bind_cols(OR.TABLE,post.interval)
+results.table <- bind_cols(OR.TABLE,post.interval.exp)
 rownames(results.table) <- rownames(OR.TABLE)
-save(results.table, file = "Results/Results7.0.Rdata")
+save(results.table, file = "Share/Results7.0.Rdata")
 ```
 
 ```{r report_stanfit7.0}
