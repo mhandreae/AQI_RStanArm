@@ -511,3 +511,20 @@ save(stanfitRn2.any, file = "Results/stanfitRn2.any.Rdata")
 shinyRn2.any <- as.shinystan(stanfitRn2.any, ppd = FALSE)
 save(shinyRn2.any, file = "Results/shinyRn2.any.Rdata")
 ```
+
+# Model with random slopes
+
+```{r eval=everything, echo = TRUE}
+require(rstanarm)
+load("Data/myAQI_cpt.Rdata")
+formulaRS7.0 <- ond ~ pay + age_group + sex + ASA + anes_type + practice +
+  (1 | cpt) + (1 + pay | prov)
+
+# +(prov|hospital) +(surgery|prov|hospital)
+# use update to only change component...
+# use fit$model <- NULL to remove the data  or fit$data or model=false??
+
+stanfitS7.0 <- stan_glmer(formulaRS7.0, data = ccAQI_cpt, family = binomial, chains = 4, iter= 500, cores =4)
+
+save(stanfitS7.0, file = "Results/stanfitS7.0.Rdata")
+```
