@@ -528,3 +528,51 @@ stanfit7s.0 <- stan_glmer(formulaR7s.0, data = ccAQI_cpt, family = binomial, cha
 
 save(stanfit7s.0, file = "Results/stanfit7s.0.Rdata")
 ```
+
+```{r function_extract_summary}
+extract.summary <- function(model.name){
+ # function to extract summary, formula and coefficients from a stan.reg object
+ # takes model name as character string and 
+ # returns a list with summary, formula and coefficients
+ require(rstanarm)
+ require(knitr)
+  
+ summary_name <- paste0(model.name, ".summary")
+ formula_name <- paste0(model.name, ".formula")
+ coefficient_name <- paste0(model.name, ".coefficients")
+
+ ## load
+ file_path <- file.path("Results", paste0(model.name,".Rdata"))
+ file_path.summary <- file.path("Results", paste0(model.name,"_summary.Rdata"))
+
+ load(file_path)
+ assign("fit",get(model.name))
+
+ ## extract summary
+ summary.fit <- summary(fit, pars="beta", probs=c(0.025, 0.5, 0.975), digits=2)
+ assign(summary_name, summary.fit)
+ assign(formula_name, fit$formula)
+ assign(coefficient_name, fit$coefficients[1:20])
+
+ save(list = c(summary_name, formula_name, coefficient_name), 
+      file = file_path.summary)
+ return(list(get(summary_name),get(formula_name),get(coefficient_name)))
+}
+```
+
+```{r function_print.my.summary}
+print.my.summary <- function(summary.list){
+ # function to print the elements of the summary list 
+ # returned by the function extract.summary
+ require(knitr)  
+ print(summary.list[1])
+ print(summary.list[2])
+ OR.table <- as.data.frame(exp(summary.list[[3]]))
+ names(OR.table)[1] <- "odds.ratios"
+ kable(OR.table)
+}
+```
+
+```{r extract_stanfit7s}
+stanfit7s.0.summary <- extract.summary(stanfit7s.0)
+```

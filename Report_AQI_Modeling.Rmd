@@ -202,3 +202,11 @@ load("Results/stanfit10.any_summary.Rdata")
 Print.my.odds.ratios("stanfit10.any")
 ```
 
+# Model with random slopes
+
+## Stanfit7s
+
+```{r stanfit7s}
+load("Results/stanfit7s_summary.Rdata")
+Print.my.odds.ratios("stanfit7s")
+```
