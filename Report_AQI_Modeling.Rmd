@@ -202,11 +202,30 @@ load("Results/stanfit10.any_summary.Rdata")
 Print.my.odds.ratios("stanfit10.any")
 ```
 
+```{r report_stanfit10any_results, eval=FALSE}
+require(rstanarm)
+require(dplyr)
+#load("Results/stanfit10.any_summary.Rdata")
+load("Results/stanfit10.any.Rdata")
+post.interval <- as.data.frame(posterior_interval(stanfit10.any, prob = c(0.95))[1:20,])
+post.interval.exp <- exp(post.interval)
+OR.TABLE <-Return.odds.ratios("stanfit10.any")
+results.table <- bind_cols(OR.TABLE,post.interval.exp)
+rownames(results.table) <- rownames(OR.TABLE)
+save(results.table, file = "Share/Results10.any.Rdata")
+```
+
+## Table of Income Quantile model
+```{r table_stanfit10.any}
+load("Share/Results10.any.Rdata")
+kable(results.table, digits=2, caption = "Model Income Quantiles")
+```
+
 # Model with random slopes
 
 ## Stanfit7s
 
-```{r stanfit7s}
+```{r stanfit7s, eval=FALSE}
 load("Results/stanfit7s_summary.Rdata")
 Print.my.odds.ratios("stanfit7s")
 ```
